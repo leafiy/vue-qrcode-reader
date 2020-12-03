@@ -31,8 +31,25 @@ export default {
     onChangeInput(event) {
       const files = [...event.target.files];
       const resultPromises = files.map(this.processFile);
-
       resultPromises.forEach(this.onDetect);
+    },
+    inputFile(data) {
+      this.$emit("loading", true);
+      fetch(data.webPath)
+        .then(res => res.blob()) // Gets the response and returns it as a blob
+        .then(blob => {
+          let files = [blob];
+          files = files.map(
+            d =>
+              new File([blob], "my_image." + data.format, {
+                type: "image/" + data.format,
+                lastModified: new Date()
+              })
+          );
+          const resultPromises = files.map(this.processFile);
+          resultPromises.forEach(this.onDetect);
+          this.$emit("loading", false);
+        });
     },
 
     async processFile(file) {
